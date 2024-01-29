@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <title>試題 1</title>
+  <style>
+    /* style here */
+    body {
+      background: #eaeaea;
+    }
+
+    .interviewee {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      line-height: 1em;
+      padding: .5em .8em;
+      background: white;
+      opacity: .8;
+      border-radius: 1em 0 0 0;
+    }
+
+    #search {
+      margin-bottom: 20px;
+    }
+
+    .item {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <span class="interviewee">面試者：陳威良</span>
+
+  <div id="search">
+    <input type="text" id="searchInput" placeholder="請輸入關鍵字">
+    <button id="searchBtn">搜尋</button>
+  </div>
+
+
+  <script type="text/javascript">
+    // coding here
+    window.onload = function () { 
+      $('#searchBtn').click(function(){
+        var searchInput = $('#searchInput').val();
+        $.ajax({
+          url: 'https://www.googleapis.com/books/v1/volumes?q=' + searchInput,
+          type: 'GET',
+          dataType: 'json',
+          success: function (data) {
+            console.log(data);
+            var items = data.items;
+            var html = '';
+            for (var i = 0; i < items.length; i++) {
+              var item = items[i];
+              var volumeInfo = item.volumeInfo;
+              var title = volumeInfo.title;
+              var authors = volumeInfo.authors;
+              var publisher = volumeInfo.publisher;
+              var publishedDate = volumeInfo.publishedDate;
+              var description = volumeInfo.description;
+              var imageLinks = volumeInfo.imageLinks;
+              var thumbnail = imageLinks.thumbnail;
+              html += '<div class="item">';
+              html += '<img src="' + thumbnail + '">';
+              html += '<h2>' + title + '</h2>';
+              html += '<p>' + description + '</p>';
+              html += '</div>';
+            }
+            $('#search').after(html);
+          },
+          error: function (xhr, ajaxOptions, thrownError) {
+            console.log(xhr.status);
+            console.log(thrownError);
+          }
+        });
+      });
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <title>試題 1</title>
+  <style>
+    body {
+      background: linear-gradient(to right, #2c3e50, #4b6cb7);
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      width: 70%;
+      margin: 0 auto;
+      color: black;
+      /* 將文字顏色設為白色以增加對比 */
+    }
+
+    .interviewee {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      line-height: 1em;
+      padding: .5em .8em;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 1em 0 0 0;
+      z-index: 2;
+    }
+
+
+    /* search */
+    #search {
+      margin-bottom: 20px;
+      padding: 10px;
+      width: 60%;
+      box-sizing: border-box;
+      position: fixed;
+      left: 10%;
+      border-radius: 5px;
+      top: 1%;
+      z-index: 2;
+    }
+
+    /* select */
+    #letter-nav {
+      margin-bottom: 20px;
+      padding: 9.5px;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      position: fixed;
+      right: 9%;
+      width: 20%;
+      top: 1%;
+      z-index: 2;
+    }
+
+    /* data */
+    #data {
+      padding: 1em;
+      background-color: rgb(255, 255, 255, .5);
+      border-radius: 5px;
+      margin-top: 40px;
+      text-align: center;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      position: relative;
+      z-index: 1;
+    }
+
+    #tip {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    h2 {
+      font-size: 2em;
+      padding-top: 0.1em;
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    .item {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+      background-color: rgb(255, 255, 255, .7);
+      box-sizing: border-box;
+    }
+
+    .item:hover {
+      background-color: #ddd;
+      cursor: pointer;
+      border-color: #fff;
+      border-width: 2px;
+    }
+
+    #copy-message {
+      position: fixed;
+      bottom: 1%;
+      left: 1%;
+      width: 10%;
+      background-color: rgb(0, 0, 0, .7);
+      color: white;
+      text-align: center;
+      padding: 2em;
+      z-index: 2;
+      border-radius: 5px;
+      display: none;
+    }
+
+
+    /* Styles for desktop */
+    @media (min-width: 768px) {
+      body {
+        padding: 50px;
+      }
+
+      #data {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+      }
+
+      h2 {
+        text-align: center;
+      }
+
+      .item {
+        width: 80%;
+        margin: 10px auto;
+      }
+
+      #copy-message {
+        left: 50%;
+        width: 10%;
+        transform: translateX(-50%);
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <span class="interviewee">面試者：陳威良</span>
+
+  <input type="search" id="search" placeholder="Search Name" />
+  <select id="letter-nav"></select>
+
+  <div id="data">
+    <p id="tip"></p>
+  </div>
+
+  <div id="copy-message"></div>
+
+  <script type="text/javascript">
+    function displayData ( data ) {
+      var dataDiv = $( '#data' );
+      dataDiv.empty();
+
+      // Sort data by name
+      data.sort( ( a, b ) => a.name.localeCompare( b.name ) );
+
+      // Group data by the first letter of the name
+      var groupedData = data.reduce( ( groups, item ) => {
+        var letter = item.name[0].toUpperCase();
+        if ( !groups[letter] ) {
+          groups[letter] = [];
+        }
+        groups[letter].push( item );
+        return groups;
+      }, {} );
+
+      // Display data with a title for each group
+      for ( var letter in groupedData ) {
+        dataDiv.append( '<h2 id="letter-' + letter + '">' + letter + '</h2>' );
+        groupedData[letter].forEach( item => {
+          dataDiv.append( '<div class="item copyable">' + item.name + '</div>' );
+        } );
+      }
+
+      $( '.item' ).on( 'click', function () {
+        navigator.clipboard.writeText( $( this ).text() )
+          .then( () => {
+            $( '#copy-message' ).show();
+            $( '#copy-message' ).text( 'Copied!' );
+            setTimeout( () => $( '#copy-message' ).text( '' ).hide(), 2000 );
+          } )
+          .catch( err => console.error( 'Could not copy text: ', err ) );
+      } );
+    }
+
+    function search ( allData ) {
+      var searchInput = $( '#search' ).val().toLowerCase();
+      var filteredData = allData.filter( item => item.name.toLowerCase().includes( searchInput ) );
+      displayData( filteredData );
+
+      if ( filteredData.length === 0 ) {
+        $( '#data' ).text( 'No results found.' );
+
+      }
+    }
+
+    $( document ).ready( function () {
+      $( '#tip' ).text( 'Loading...' );
+
+      $.ajax( {
+        url: 'https://run.mocky.io/v3/ca6344d4-bf83-4daa-af2f-2e4999b89296',
+        success: function ( data ) {
+          displayData( data );
+
+          $( '#search' ).on( 'input', function () {
+            search( data );
+          } );
+        }
+      } );
+    } );
+
+    $( '#letter-nav' ).on( 'change', function () {
+      var letter = $( this ).val();
+      if ( letter ) {
+        var title = $( '#letter-' + letter );
+        $( 'html, body' ).animate( {
+          scrollTop: title.offset().top - 100
+        }, 1000 );
+      }
+    } );
+
+    var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var dropdown = $( '#letter-nav' );
+    dropdown.append( '<option value="" selected disabled>Navigate to...</option>' );
+    for ( var i = 0; i < letters.length; i++ ) {
+      dropdown.append( '<option value="' + letters[i] + '">' + letters[i] + '</option>' );
+    }
+
+    // $( '#search' ).focus();
+
+  </script>
+</body>
+
+</html>
+<!-- 點擊複製 -->
+<!-- 修改var -->
+<!-- 森竟煮色 -->
+
+<!-- 至頂搜尋框 -->
+<!-- 製作相似標籤 -->
+<!-- ＋＋＋ 英文排序 -->
+<!-- 在這段程式碼中，並不需要使用 window.onload = function () { }。原因如下：
+window.onload 是一種 JavaScript 事件，當所有的資源（例如圖片、腳本文件等）都已經完成載入後，才會觸發。在這段程式碼中，我們並沒有看到任何需要等待所有資源載入完成才能執行的操作。
+
+這段程式碼已經使用了 jQuery 的 $(document).ready(function () { })。這個函數會在 DOM 完成載入後就立即執行，不需要等待其他資源（例如圖片）載入。這比 window.onload
+更早觸發，並且在大多數情況下，都是更好的選擇。
+
+因此，根據這段程式碼的需求，我們並不需要使用 window.onload = function () { }。 -->
