@@ -7,15 +7,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
   <title>試題 1</title>
   <style>
+    :root {
+      --black: #000;
+      --white: #fff;
+      --opacity-white: rgb(255, 255, 255, .7);
+      --opacity-black: rgb(0, 0, 0, .7);
+      --logo-main-color: #217fc4;
+      --logo-sec-color: #00478b;
+      --logo-tri-color: #8ec31f;
+      --main-bg-color: linear-gradient(to right, var(--logo-sec-color), var(--logo-main-color));
+      --main-font: Arial, sans-serif;
+    }
+
     body {
-      background: linear-gradient(to right, #2c3e50, #4b6cb7);
-      padding: 20px;
-      font-family: Arial, sans-serif;
+      background: var(--main-bg-color);
+      padding: .5em;
+      font-family: var(--main-font);
       width: 90%;
       margin: 0 auto;
-      color: #fff;
+      color: var(--logo-tri-color);
+      background-size: 200% 200%;
+      animation: gradient-animation 5s ease infinite;
     }
 
     .interviewee {
@@ -24,13 +39,12 @@
       right: 0;
       line-height: 1em;
       padding: .5em .8em;
-      background: rgba(255, 255, 255, 0.8);
+      background: var(--white);
       border-radius: 1em 0 0 0;
       z-index: 2;
+      color: var(--black);
     }
 
-
-    /* search */
     #search {
       margin-bottom: 20px;
       padding: 10px;
@@ -39,35 +53,50 @@
       position: fixed;
       left: 10%;
       border-radius: 5px;
-      top: 1%;
+      border: none;
+      top: 5%;
       z-index: 2;
+      border: 2px solid var(--white);
+      background-color: var(--opacity-white);
     }
 
-    /* select */
+    #search::placeholder {
+      color: var(--black);
+      font-size: 1.3em;
+    }
+
     #letter-nav {
       margin-bottom: 20px;
-      padding: 9.5px;
+      padding: 8px;
       width: 100%;
       box-sizing: border-box;
       font-size: 16px;
-      border: 1px solid #ccc;
+      border: none;
       border-radius: 5px;
       position: fixed;
       right: 9%;
       width: 20%;
-      top: 1%;
+      top: 5%;
       z-index: 2;
+      border: 2px solid var(--white);
+      background-color: var(--opacity-white);
     }
 
-    /* data */
+    #search:focus,
+    #letter-nav:focus {
+      outline: none;
+      background-color: var(--white);
+    }
+
     #data {
       padding: 1em;
-      background-color: rgb(255, 255, 255, .5);
+      background-color: transparent;
       border-radius: 5px;
-      margin-top: 40px;
+      margin-top: 5em;
       text-align: center;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto;
       gap: 5px;
       position: relative;
       z-index: 1;
@@ -78,30 +107,30 @@
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
+      font-size: 2em;
     }
 
     h2 {
       font-size: 2em;
-      padding-top: 0.1em;
-      display: grid;
-      grid-template-columns: 1fr;
+      padding-top: .1em;
     }
 
     .item {
-      border: 1px solid #aaa;
+      border: 2px solid var(--white);
       padding: 10px;
       margin-bottom: 10px;
       border-radius: 5px;
       transition: background-color 0.3s;
-      background-color: rgba(146, 159, 152, 0.5);
+      background-color: transparent;
       box-sizing: border-box;
       border-width: 2px;
+      transition: all 0.3s;
     }
 
     .item:hover {
-      background-color: #ddd;
+      background-color: var(--white);
       cursor: pointer;
-      border-color: #fff;
+      border: 2px solid var(--logo-tri-color);
     }
 
     #copy-message {
@@ -109,42 +138,38 @@
       bottom: 1%;
       left: 1%;
       width: 10%;
-      background-color: rgb(0, 0, 0, .7);
-      color: white;
+      background-color: var(--opacity-black);
+      color: var(--white);
       text-align: center;
-      padding: 2em;
       z-index: 2;
+      padding: 10px;
       border-radius: 5px;
       display: none;
+      font-size: 0.5em;
     }
 
-
-    /* Styles for desktop */
     @media (min-width: 768px) {
       body {
-        padding: 50px;
+        width: 80%;
       }
 
       #data {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(6, 1fr);
         gap: 10px;
       }
+    }
 
-      h2 {
-        text-align: center;
+    @keyframes gradient-animation {
+      0% {
+        background-position: 0% 50%;
       }
 
-      .item {
-        width: 80%;
-        margin: 10px auto;
+      50% {
+        background-position: 100% 50%;
       }
 
-      #copy-message {
-        left: 50%;
-        width: 10%;
-        transform: translateX(-50%);
-        display: none;
+      100% {
+        background-position: 0% 50%;
       }
     }
   </style>
@@ -153,7 +178,7 @@
 <body>
   <span class="interviewee">面試者：陳威良</span>
 
-  <input type="search" id="search" placeholder="Search Name" />
+  <input type="search" id="search" placeholder=" Type ' / ' to search " />
   <select id="letter-nav"></select>
 
   <div id="data">
@@ -163,14 +188,14 @@
   <div id="copy-message"></div>
 
   <script type="text/javascript">
+    // display function
     function displayData ( data ) {
       var dataDiv = $( '#data' );
       dataDiv.empty();
 
-      // Sort data by name
       data.sort( ( a, b ) => a.name.localeCompare( b.name ) );
 
-      // Group data by the first letter of the name
+      // use reduce to group data by first letter
       var groupedData = data.reduce( ( groups, item ) => {
         var letter = item.name[0].toUpperCase();
         if ( !groups[letter] ) {
@@ -180,14 +205,15 @@
         return groups;
       }, {} );
 
-      // Display data with a title for each group
-      for ( var letter in groupedData ) {
+      // display data
+      for ( let letter in groupedData ) {
         dataDiv.append( '<h2 id="letter-' + letter + '">' + letter + '</h2>' );
         groupedData[letter].forEach( item => {
           dataDiv.append( '<div class="item copyable">' + item.name + '</div>' );
         } );
       }
 
+      // add click event
       $( '.item' ).on( 'click', function () {
         navigator.clipboard.writeText( $( this ).text() )
           .then( () => {
@@ -199,6 +225,7 @@
       } );
     }
 
+    // search function
     function search ( allData ) {
       var searchInput = $( '#search' ).val().toLowerCase();
       var filteredData = allData.filter( item => item.name.toLowerCase().includes( searchInput ) );
@@ -210,6 +237,7 @@
       }
     }
 
+    // get data from API
     $( document ).ready( function () {
       $( '#tip' ).text( 'Loading...' );
 
@@ -225,6 +253,16 @@
       } );
     } );
 
+
+    // focus search when '/' is pressed
+    $( document ).on( 'keydown', function ( event ) {
+      if ( event.key === '/' ) {
+        event.preventDefault();
+        $( '#search' ).focus();
+      }
+    } );
+
+    // scroll to letter when selected
     $( '#letter-nav' ).on( 'change', function () {
       var letter = $( this ).val();
       if ( letter ) {
@@ -237,29 +275,11 @@
 
     var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     var dropdown = $( '#letter-nav' );
-    dropdown.append( '<option value="" selected disabled>Navigate to...</option>' );
+    dropdown.append( '<option value="" selected disabled>select</option>' );
     for ( var i = 0; i < letters.length; i++ ) {
       dropdown.append( '<option value="' + letters[i] + '">' + letters[i] + '</option>' );
     }
-
-    // $( '#search' ).focus();
-
   </script>
 </body>
 
 </html>
-<!-- 點擊複製 -->
-<!-- 修改var -->
-<!-- 森竟煮色 -->
-<!-- h2 獨立一層 -->
-
-<!-- 至頂搜尋框 -->
-<!-- 製作相似標籤 -->
-<!-- ＋＋＋ 英文排序 -->
-<!-- 在這段程式碼中，並不需要使用 window.onload = function () { }。原因如下：
-window.onload 是一種 JavaScript 事件，當所有的資源（例如圖片、腳本文件等）都已經完成載入後，才會觸發。在這段程式碼中，我們並沒有看到任何需要等待所有資源載入完成才能執行的操作。
-
-這段程式碼已經使用了 jQuery 的 $(document).ready(function () { })。這個函數會在 DOM 完成載入後就立即執行，不需要等待其他資源（例如圖片）載入。這比 window.onload
-更早觸發，並且在大多數情況下，都是更好的選擇。
-
-因此，根據這段程式碼的需求，我們並不需要使用 window.onload = function () { }。 -->
