@@ -7,11 +7,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <title>試題 2</title>
   <style>
-    /* style here */
     body {
-      background: #eaeaea;
+      background: #fff;
+      height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 1em;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
     }
 
     .interviewee {
@@ -24,14 +31,184 @@
       opacity: .8;
       border-radius: 1em 0 0 0;
     }
+
+    #loading {
+      position: fixed;
+      display: grid;
+      place-items: center;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      font-size: 2em;
+      color: black;
+      background-color: rgb(255, 255, 255, .7);
+      animation: fadeOut 1s ease-in-out alternate infinite;
+    }
+
+    main {
+      width: 100%; 
+      height: 300px; 
+    }
+
+    @media (min-width: 768px) {
+      main {
+        width: 80%;
+        height: 80%;
+      }
+    }
+
+    @keyframes fadeOut {
+      0% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0.3;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <span class="interviewee">面試者：姓名</span>
+  <span class="interviewee">面試者：陳威良</span>
+  <div id="loading">Loading...</div>
+  <main>
+    <canvas id="myChart"></canvas>
+  </main>
+
   <script type="text/javascript">
-    // coding here
-    window.onload = function () { }
+    let mockyData = {
+      0: [],
+      1: [],
+      2: [],
+      3: [],
+      4: []
+    };
+    let timeLine_xAxis = [];
+    let timeLine_tip = [];
+
+    window.onload = function () {
+      let urls = [
+        'https://run.mocky.io/v3/cf8ff54a-40af-4907-91df-3a24bfb75c5f',
+        'https://run.mocky.io/v3/827936fd-d288-4ec0-8c05-865878ef4409',
+        'https://run.mocky.io/v3/18edb8c1-99c9-4f8c-9150-6a5508edbde1',
+        'https://run.mocky.io/v3/82b0ad83-4b4c-4fe7-a89d-8b88eb5c263b',
+        'https://run.mocky.io/v3/b27275e1-f9d5-4a0c-94a8-aa84408bffd0?mocky-delay=1500ms'
+      ];
+
+      Promise.all( urls.map( url =>
+        fetch( url ).then( response => {
+          $( '#loading' ).show();
+          if ( !response.ok ) {
+            throw new Error( `HTTP error! status: ${response.status}` );
+          }
+          return response.json();
+        } ).catch( error => {
+          console.error( 'Error:', error );
+          return null;
+        } )
+      ) ).then( data => {
+        data.forEach( ( item, index ) => {
+          if ( item ) {
+            mockyData[index] = item.data.map( item => item.Data );
+            timeLine_xAxis = item.data.map( item => {
+              let parts = item.Time.split( ' ' );
+              let date = parts[0].split( '-' );
+              let time = parts[1].split( ':' );
+              return `${date[0]}/${date[1]}/${date[2]} ${time[0]}:${time[1]}`;
+            } );
+            timeLine_tip = item.data.map( item => item.Time ); 
+          }
+        } );
+
+        let ctx = $( '#myChart' );
+        var data = {
+          labels: timeLine_xAxis,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'A',
+              data: mockyData[0],
+              backgroundColor: 'rgba(255, 0, 0,0.7)',
+              yAxisID: 'y1',
+              order: 2
+            },
+            {
+              type: 'bar',
+              label: 'B',
+              data: mockyData[1],
+              backgroundColor: 'rgb(0, 255, 0,0.7)',
+              yAxisID: 'y1',
+              order: 2
+            },
+            {
+              type: 'bar',
+              label: 'C',
+              data: mockyData[2],
+              backgroundColor: 'rgb(255, 255, 0,0.7)',
+              yAxisID: 'y1',
+              order: 2
+            },
+            {
+              type: 'line',
+              label: 'D',
+              data: mockyData[3],
+              backgroundColor: 'rgb(0, 0, 255)',
+              yAxisID: 'y2',
+              pointRadius: 3,
+              pointHoverRadius: 7,
+              order: 1
+            },
+            {
+              type: 'line',
+              label: 'E',
+              data: mockyData[4],
+              backgroundColor: 'rgb(128, 0, 128)',
+              yAxisID: 'y2',
+              pointRadius: 3,
+              pointHoverRadius: 7,
+              order: 1
+            },
+          ]
+        };
+
+        let config = {
+          type: 'scatter',
+          data: data,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              'y1': {
+                beginAtZero: true
+              },
+              'y2': {
+                position: 'right',
+              },
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: '2023-12-10 Data',
+                font: {
+                  size: 20,
+                },
+              },
+              tooltip: {
+                callbacks: {
+                  title: function ( tooltipItem ) {
+                    return timeLine_tip[tooltipItem[0].dataIndex];
+                  }
+                }
+              }
+            }
+          }
+        };
+        let myChart = new Chart( ctx, config );
+
+        $( '#loading' ).hide();
+      } );
+    }
   </script>
 </body>
 
