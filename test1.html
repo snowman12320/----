@@ -30,7 +30,7 @@
       margin: 0 auto;
       color: var(--logo-tri-color);
       background-size: 200% 200%;
-      animation: gradient-animation 5s ease infinite;
+      animation: gradient-animation 7s ease infinite;
     }
 
     .interviewee {
@@ -88,6 +88,12 @@
       background-color: var(--white);
     }
 
+    #search:disabled,
+    #letter-nav:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
     #data {
       padding: 1em;
       background-color: transparent;
@@ -108,6 +114,7 @@
       top: 50%;
       transform: translate(-50%, -50%);
       font-size: 2em;
+      white-space: nowrap;
     }
 
     h2 {
@@ -182,9 +189,9 @@
   <select id="letter-nav"></select>
 
   <div id="data">
-    <p id="tip"></p>
   </div>
 
+  <p id="tip"></p>
   <div id="copy-message"></div>
 
   <script type="text/javascript">
@@ -232,19 +239,25 @@
       displayData( filteredData );
 
       if ( filteredData.length === 0 ) {
-        $( '#data' ).text( 'No results found.' );
-
+        $( '#tip' ).text( 'No results found.' );
+      } else {
+        $( '#tip' ).text( '' );
       }
     }
 
     // get data from API
     $( document ).ready( function () {
       $( '#tip' ).text( 'Loading...' );
+      $( '#search' ).prop( 'disabled', true );
+      $( '#letter-nav' ).prop( 'disabled', true );
 
       $.ajax( {
         url: 'https://run.mocky.io/v3/ca6344d4-bf83-4daa-af2f-2e4999b89296',
         success: function ( data ) {
           displayData( data );
+          $( '#tip' ).text( '' );
+          $( '#search' ).prop( 'disabled', false );
+          $( '#letter-nav' ).prop( 'disabled', false );
 
           $( '#search' ).on( 'input', function () {
             search( data );
@@ -267,6 +280,10 @@
       var letter = $( this ).val();
       if ( letter ) {
         var title = $( '#letter-' + letter );
+        if ( !title.offset() ) {
+          window.alert( 'No results found.' );
+          return;
+        }
         $( 'html, body' ).animate( {
           scrollTop: title.offset().top - 100
         }, 1000 );

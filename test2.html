@@ -12,13 +12,18 @@
   <title>試題 2</title>
   <style>
     body {
-      background: #fff;
+      background: whitesmoke;
       height: 100vh;
       display: grid;
       place-items: center;
       padding: 1em;
       font-family: Arial, sans-serif;
       overflow: hidden;
+    }
+
+    main { 
+      width: 90%;
+      height: 50%;
     }
 
     .interviewee {
@@ -42,13 +47,8 @@
       bottom: 0;
       font-size: 2em;
       color: black;
-      background-color: rgb(255, 255, 255, .7);
-      animation: fadeOut 1s ease-in-out alternate infinite;
-    }
-
-    main {
-      width: 100%;
-      height: 300px;
+      background-color: white;
+      animation: fadeOut .5s ease-in-out alternate infinite;
     }
 
     @media (min-width: 768px) {
@@ -88,6 +88,124 @@
     let timeLine_xAxis = [];
     let timeLine_tip = [];
 
+    async function fetchData ( url ) {
+      try {
+        const response = await fetch( url );
+        if ( !response.ok ) {
+          throw new Error( `HTTP error! status: ${response.status}` );
+        }
+        const data = await response.json();
+        return data;
+      } catch ( error ) {
+        console.error( 'Error:', error );
+        return null;
+      }
+    }
+
+    function processData ( data ) {
+      data.forEach( ( item, index ) => {
+        if ( item ) {
+          mockyData[index] = item.data.map( item => item.Data );
+          timeLine_xAxis = item.data.map( item => {
+            let parts = item.Time.split( ' ' );
+            let date = parts[0].split( '-' );
+            let time = parts[1].split( ':' );
+            return `${date[0]}/${date[1]}/${date[2]} ${time[0]}:${time[1]}`;
+          } );
+          timeLine_tip = item.data.map( item => item.Time );
+        }
+      } );
+    }
+
+    function drawChart () {
+      let ctx = $( '#myChart' );
+      let data = {
+        labels: timeLine_xAxis,
+        datasets: [
+          {
+            type: 'bar',
+            label: 'A',
+            data: mockyData[0],
+            backgroundColor: 'rgba(255, 0, 0,0.7)',
+            yAxisID: 'y1',
+            order: 2
+          },
+          {
+            type: 'bar',
+            label: 'B',
+            data: mockyData[1],
+            backgroundColor: 'rgb(0, 255, 0,0.7)',
+            yAxisID: 'y1',
+            order: 2
+          },
+          {
+            type: 'bar',
+            label: 'C',
+            data: mockyData[2],
+            backgroundColor: 'rgb(255, 255, 0,0.7)',
+            yAxisID: 'y1',
+            order: 2
+          },
+          {
+            type: 'line',
+            label: 'D',
+            data: mockyData[3],
+            backgroundColor: 'rgb(0, 0, 255)',
+            yAxisID: 'y2',
+            pointRadius: 3,
+            pointHoverRadius: 7,
+            order: 1
+          },
+          {
+            type: 'line',
+            label: 'E',
+            data: mockyData[4],
+            backgroundColor: 'rgb(128, 0, 128)',
+            yAxisID: 'y2',
+            pointRadius: 3,
+            pointHoverRadius: 7,
+            order: 1
+          },
+        ]
+      };
+
+      let config = {
+        type: 'scatter',
+        data: data,
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            'y1': {
+              beginAtZero: true
+            },
+            'y2': {
+              position: 'right',
+            },
+          },
+          plugins: {
+            title: {
+              display: true,
+              text: '2023-12-10 Data',
+              font: {
+                size: 20,
+              },
+            },
+            tooltip: {
+              callbacks: {
+                title: function ( tooltipItem ) {
+                  return timeLine_tip[tooltipItem[0].dataIndex];
+                }
+              }
+            }
+          }
+        }
+      };
+      let myChart = new Chart( ctx, config );
+
+      $( '#loading' ).hide();
+    }
+
     window.onload = function () {
       let urls = [
         'https://run.mocky.io/v3/cf8ff54a-40af-4907-91df-3a24bfb75c5f',
@@ -97,120 +215,12 @@
         'https://run.mocky.io/v3/b27275e1-f9d5-4a0c-94a8-aa84408bffd0?mocky-delay=1500ms'
       ];
 
-      // fetch data
-      Promise.all( urls.map( url =>
-        fetch( url ).then( response => {
-          if ( !response.ok ) {
-            throw new Error( `HTTP error! status: ${response.status}` );
-          }
-          return response.json();
-        } ).catch( error => {
-          console.error( 'Error:', error );
-          return null;
-        } )
-      ) ).then( data => {
-        data.forEach( ( item, index ) => {
-          if ( item ) {
-            mockyData[index] = item.data.map( item => item.Data );
-            timeLine_xAxis = item.data.map( item => {
-              let parts = item.Time.split( ' ' );
-              let date = parts[0].split( '-' );
-              let time = parts[1].split( ':' );
-              return `${date[0]}/${date[1]}/${date[2]} ${time[0]}:${time[1]}`;
-            } );
-            timeLine_tip = item.data.map( item => item.Time );
-          }
-        } );
-
-        // draw chart
-        let ctx = $( '#myChart' );
-        var data = {
-          labels: timeLine_xAxis,
-          datasets: [
-            {
-              type: 'bar',
-              label: 'A',
-              data: mockyData[0],
-              backgroundColor: 'rgba(255, 0, 0,0.7)',
-              yAxisID: 'y1',
-              order: 2
-            },
-            {
-              type: 'bar',
-              label: 'B',
-              data: mockyData[1],
-              backgroundColor: 'rgb(0, 255, 0,0.7)',
-              yAxisID: 'y1',
-              order: 2
-            },
-            {
-              type: 'bar',
-              label: 'C',
-              data: mockyData[2],
-              backgroundColor: 'rgb(255, 255, 0,0.7)',
-              yAxisID: 'y1',
-              order: 2
-            },
-            {
-              type: 'line',
-              label: 'D',
-              data: mockyData[3],
-              backgroundColor: 'rgb(0, 0, 255)',
-              yAxisID: 'y2',
-              pointRadius: 3,
-              pointHoverRadius: 7,
-              order: 1
-            },
-            {
-              type: 'line',
-              label: 'E',
-              data: mockyData[4],
-              backgroundColor: 'rgb(128, 0, 128)',
-              yAxisID: 'y2',
-              pointRadius: 3,
-              pointHoverRadius: 7,
-              order: 1
-            },
-          ]
-        };
-
-        let config = {
-          type: 'scatter',
-          data: data,
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              'y1': {
-                beginAtZero: true
-              },
-              'y2': {
-                position: 'right',
-              },
-            },
-            plugins: {
-              title: {
-                display: true,
-                text: '2023-12-10 Data',
-                font: {
-                  size: 20,
-                },
-              },
-              tooltip: {
-                callbacks: {
-                  title: function ( tooltipItem ) {
-                    return timeLine_tip[tooltipItem[0].dataIndex];
-                  }
-                }
-              }
-            }
-          }
-        };
-        let myChart = new Chart( ctx, config );
-
-        $( '#loading' ).hide();
+      Promise.all( urls.map( url => fetchData( url ) ) ).then( data => {
+        processData( data );
+        drawChart();
       } );
     }
+
   </script>
 </body>
 
